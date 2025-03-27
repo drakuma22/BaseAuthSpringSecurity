@@ -3,6 +3,7 @@ package com.example.security.Base.Jwt.Security.project.service;
 import com.example.security.Base.Jwt.Security.project.dto.AuthRequest;
 import com.example.security.Base.Jwt.Security.project.dto.AuthResponse;
 import com.example.security.Base.Jwt.Security.project.dto.RegisterRequest;
+import com.example.security.Base.Jwt.Security.project.exception.UserAlreadyExistsException;
 import com.example.security.Base.Jwt.Security.project.model.User;
 import com.example.security.Base.Jwt.Security.project.repository.UserRepository;
 import com.example.security.Base.Jwt.Security.project.security.JwtService;
@@ -23,6 +24,13 @@ public class AuthService {
     private final JwtService jwtService;
 
     public void register(RegisterRequest req) {
+
+        var registerUser = userRepository.findByUsernameAndEmail(req.getUsername(), req.getEmail());
+
+        if(registerUser.isPresent()){
+            throw new UserAlreadyExistsException("User already exists with the provided username and email");
+        }
+
         var user = User.builder()
                 .username(req.getUsername())
                 .password(passwordEncoder.encode(req.getPassword()))
